@@ -17,21 +17,204 @@ describe('Header and Footer Buttons and Links Test', () => {
       cy.visit('https://guest:welcome2qauto@qauto.forstudy.space');
   });
 
-  it('Should find and verify the Sign Up button', () => {
-      cy.contains('Sign up').should('be.visible');
-  });
+    // it('Required fields and color check', () => {
 
-  it('Should find all social media icons in the contacts section', () => {
-    const socialMediaSelectors = ['.socials_icon.icon.icon-facebook', '.socials_icon.icon.icon-telegram', '.socials_icon.icon.icon-youtube', '.socials_icon.icon.icon-instagram', '.socials_icon.icon.icon-linkedin'];
-    socialMediaSelectors.forEach(selector => {
-        cy.get(selector).should('be.visible');
+    //   cy.contains('Sign up').should('be.visible');
+    //   cy.get('.hero-descriptor_btn.btn.btn-primary').click();
+    //   cy.contains('Registration').should('be.visible');
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled');
+
+    //   cy.get('#signupName').click();
+    //   cy.get('#signupLastName').click();
+    //   cy.contains('Name required').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled');
+
+    //   cy.get('#signupEmail').click();
+    //   cy.contains('Last name required').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled')
+
+    //   cy.get('#signupPassword').click();
+    //   cy.contains('Email required').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled');
+
+    //   cy.get('#signupRepeatPassword').click();
+    //   cy.contains('Password required').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled');
+
+    //   cy.get('#signupName').click();
+    //   cy.contains('Re-enter password required').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+    //   cy.contains('Register').should('be.visible');
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled');
+    // });
+
+
+    // it('Wrong Data and color check', () => {
+
+    //   cy.contains('Sign up').should('be.visible');
+    //   cy.get('.hero-descriptor_btn.btn.btn-primary').click();
+    //   cy.contains('Registration').should('be.visible');
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled');
+
+    //   cy.get('#signupName').click();
+    //   cy.get('#signupName').type('1');
+    //   cy.get('#signupLastName').click();
+    //   cy.contains('Name is invalid').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');;
+
+    //   cy.get('#signupLastName').type('1');
+    //   cy.get('#signupEmail').click();
+    //   cy.contains('Last name is invalid').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');;
+
+    //   cy.get('#signupEmail').type('1');
+    //   cy.get('#signupPassword').click();
+    //   cy.contains('Email is incorrect').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');;      
+
+    //   cy.get('#signupPassword').type('1');
+    //   cy.get('#signupRepeatPassword').click();
+    //   cy.contains('Password has to be from 8 to 15 characters long and contain at least one integer, one capital, and one small letter').should('be.visible')
+    //   .and('have.css', 'color', 'rgb(220, 53, 69)');  
+       
+    // }); 
+
+    // it('Wrong Length and color check for "Name" and "Last Name fields"', () => {
+
+    //   cy.contains('Sign up').should('be.visible');
+    //   cy.get('.hero-descriptor_btn.btn.btn-primary').click();
+    //   cy.contains('Registration').should('be.visible');
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled');
+
+    //   cy.get('#signupName').click();
+    //   cy.get('#signupName').type('M');
+    //   cy.get('#signupLastName').click();
+    //   cy.contains('Name has to be from 2 to 20 characters long').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+
+    //   cy.get('#signupLastName').type('V');
+    //   cy.get('#signupName').click();
+    //   cy.contains('Last name has to be from 2 to 20 characters long').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+
+    //   cy.get('#signupName').type('mmmmmmmmmmmmmmmmmmmm');
+    //   cy.get('#signupLastName').click();
+    //   cy.contains('Name has to be from 2 to 20 characters long').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+
+    //   cy.get('#signupLastName').type('vvvvvvvvvvvvvvvvvvvv');
+    //   cy.get('#signupName').click();
+    //   cy.contains('Last name has to be from 2 to 20 characters long').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+
+    //   cy.get('#signupName').clear();
+    //   cy.get('#signupName').type('Mykhailo');
+    //   cy.get('#signupLastName').click();
+    //   cy.get('#signupLastName').clear();
+    //   cy.get('#signupLastName').type('Vasiliev');
+    //   cy.get('#signupEmail').click();
+    //   cy.contains('Name has to be from 2 to 20 characters long').should('not.exist');
+    //   cy.contains('Last name has to be from 2 to 20 characters long').should('not.exist');  
+
+    // }); 
+
+    // it('Wrong Length and color check for "Password" and "Re-enter Password fields AND Checking the same between them"', () => {
+
+    //   cy.contains('Sign up').should('be.visible');
+    //   cy.get('.hero-descriptor_btn.btn.btn-primary').click();
+    //   cy.contains('Registration').should('be.visible');
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled');
+
+    //   cy.get('#signupPassword').click();
+    //   cy.get('#signupPassword').type('qwerasdf');
+    //   cy.get('#signupRepeatPassword').click();
+    //   cy.contains('Password has to be from 8 to 15 characters long and contain at least one integer, one capital, and one small letter').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled'); 
+
+    //   cy.get('#signupPassword').click();
+    //   cy.get('#signupPassword').type('1');
+    //   cy.get('#signupRepeatPassword').click();
+    //   cy.contains('Password has to be from 8 to 15 characters long and contain at least one integer, one capital, and one small letter').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled'); 
+
+    //   cy.get('#signupPassword').click();
+    //   cy.get('#signupPassword').type('Q');
+    //   cy.get('#signupRepeatPassword').click();
+    //   cy.contains('Password has to be from 8 to 15 characters long and contain at least one integer, one capital, and one small letter').should('not.exist');
+
+    //   // Wrong repeat Password
+    //   cy.get('#signupRepeatPassword').type('qwerasdf1W');
+    //   cy.get('#signupName').click();
+    //   cy.contains('Passwords do not match').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled'); 
+
+    //   cy.get('#signupRepeatPassword').click();
+    //   cy.get('#signupRepeatPassword').clear();
+    //   cy.get('#signupRepeatPassword').type('qwerasdf1Q');
+    //   cy.get('#signupName').click();
+    //   cy.contains('Passwords do not match').should('not.exist');
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled'); 
+    // }); 
+
+
+
+    // it('Creating New User', () => {
+
+    //   cy.contains('Sign up').should('be.visible');
+    //   cy.get('.hero-descriptor_btn.btn.btn-primary').click();
+    //   cy.contains('Registration').should('be.visible');
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled');
+
+    //   cy.get('#signupName').click();
+    //   cy.get('#signupName').type('Mykhailo')
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled');
+
+    //   cy.get('#signupLastName').click();
+    //   cy.get('#signupLastName').type('Vasiliev')
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled');
+
+
+    //   cy.get('#signupEmail').click();
+    //   cy.get('#signupEmail').type('lolhawkeromg+test6@gmail.com')
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled')
+
+    //   cy.get('#signupPassword').click();
+    //   cy.get('#signupPassword').type('qwerasdf1Q')
+    //   cy.get('[class="btn btn-primary"]').should('be.disabled');
+
+    //   cy.get('#signupRepeatPassword').click();
+    //   cy.get('#signupRepeatPassword').type('qwerasdf1Q')
+    //   cy.get('[class="btn btn-primary"]').should('not.be.disabled');
+
+    //   cy.get('[class="btn btn-primary"]').click();
+    //   cy.contains('Garage').should('be.visible');
+
+    // });
+
+    it('Login as New User', () => {
+
+      cy.login('lolhawkeromg+test6@gmail.com');
+
+      cy.get('#signinPassword').type('qwerasdf1Q', { sensitive: true });
+
+      cy.get('#remember').check;
+      cy.get('[class="btn btn-primary"]').click();
+      cy.contains('Garage').should('be.visible');
+
     });
-});
 
-  it('Should verify footer contact links', () => {
-      cy.contains('ithillel.ua').should('be.visible');
-      cy.contains('support@ithillel.ua').should('be.visible');
-  });
+
+
+
+
+
+//   it('Should find and verify the Sign Up button', () => {
+//       cy.contains('Sign up').should('be.visible');
+//   });
+
+//   it('Should find all social media icons in the contacts section', () => {
+//     const socialMediaSelectors = ['.socials_icon.icon.icon-facebook', '.socials_icon.icon.icon-telegram', '.socials_icon.icon.icon-youtube', '.socials_icon.icon.icon-instagram', '.socials_icon.icon.icon-linkedin'];
+//     socialMediaSelectors.forEach(selector => {
+//         cy.get(selector).should('be.visible');
+//     });
+// });
+
+//   it('Should verify footer contact links', () => {
+//       cy.contains('ithillel.ua').should('be.visible');
+//       cy.contains('support@ithillel.ua').should('be.visible');
+  // });
 });
 
 
