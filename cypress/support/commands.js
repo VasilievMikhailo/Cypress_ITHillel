@@ -47,3 +47,59 @@ Cypress.Commands.overwrite('type', (originalFn, element, text, options) => {
     cy.get('#signinEmail').type(email);
 
 });
+
+  Cypress.Commands.add('list_of_brands', (brands) => {
+    cy.get('#addCarBrand option').should('have.length', brands.length);
+    cy.get('#addCarBrand option').each(($el, index) => {
+      cy.wrap($el).should('have.text', brands[index]);
+    });
+  });
+
+  Cypress.Commands.add('list_of_audi_models', (audi_models) => {
+    cy.get('#addCarModel option').should('have.length', audi_models.length);
+    cy.get('#addCarModel option').each(($el, index) => {
+      cy.wrap($el).should('have.text', audi_models[index]);
+    });
+  });
+
+  Cypress.Commands.add('list_of_bmw_models', (bmw_models) => {
+    cy.get('#addCarModel option').should('have.length', bmw_models.length);
+    cy.get('#addCarModel option').each(($el, index) => {
+      cy.wrap($el).should('have.text', bmw_models[index]);
+    });
+  });
+
+  Cypress.Commands.add('list_of_ford_models', (ford_models) => {
+    cy.get('#addCarModel option').should('have.length', ford_models.length);
+    cy.get('#addCarModel option').each(($el, index) => {
+      cy.wrap($el).should('have.text', ford_models[index]);
+    });
+  });
+
+  Cypress.Commands.add('list_of_porsche_models', (porsche_models) => {
+    cy.get('#addCarModel option').should('have.length', porsche_models.length);
+    cy.get('#addCarModel option').each(($el, index) => {
+      cy.wrap($el).should('have.text', porsche_models[index]);
+    });
+  });
+
+  Cypress.Commands.add('list_of_fiat_models', (fiat_models) => {
+    cy.get('#addCarModel option').should('have.length', fiat_models.length);
+    cy.get('#addCarModel option').each(($el, index) => {
+      cy.wrap($el).should('have.text', fiat_models[index]);
+    });
+  });
+
+
+  Cypress.Commands.add('update_mileage', (value_to_add) => {
+    cy.get('#addExpenseMileage')
+      .invoke('val')
+      .then((currentValue) => {
+        const numberValue = Number(currentValue) || 0;
+        const newValue = Number(numberValue) + Number(value_to_add);
+        cy.get('#addExpenseMileage').clear();
+        cy.get('#addExpenseMileage').should('have.value', '');
+        cy.get('#addExpenseMileage').type(newValue); 
+      });
+  });
+  
