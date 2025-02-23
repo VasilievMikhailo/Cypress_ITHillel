@@ -41,11 +41,21 @@ Cypress.Commands.overwrite('type', (originalFn, element, text, options) => {
     return originalFn(element, text, options)
   });
 
-  Cypress.Commands.add('login', (email) => {
-    cy.visit('https://guest:welcome2qauto@qauto.forstudy.space');
-    cy.get('[class="btn btn-outline-white header_signin"]').click();
-    cy.get('#signinEmail').type(email);
+//   Cypress.Commands.add('login', (email) => {
+//     cy.visit('https://guest:welcome2qauto@qauto.forstudy.space');
+//     cy.get('[class="btn btn-outline-white header_signin"]').click();
+//     cy.get('#signinEmail').type(email);
 
+// });
+
+Cypress.Commands.add('login', () => {
+  cy.visit('/');
+
+  cy.get('[class="btn btn-outline-white header_signin"]').click();
+  cy.get('#signinEmail').type(Cypress.env('userEmail'));
+  cy.get('#signinPassword').type(Cypress.env('userPassword'));
+  cy.get('[class="btn btn-primary"]').click();
+  cy.contains('Garage').should('be.visible');
 });
 
   Cypress.Commands.add('list_of_brands', (brands) => {

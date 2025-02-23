@@ -12,129 +12,264 @@
 // https://on.cypress.io/introduction-to-cypress
 
 
-describe('Add car and Fuel expenses', () => {
+
+describe('Car Creation and Saving ID for created car', () => {
+  let createdCarId;
+
   before(() => {
-    cy.visit('/')
-    console.log(Cypress.env());
+    cy.login();
+
+    cy.getCookies().then((cookies) => {
+      Cypress.env('sessionCookies', cookies);
+    });
+  });
+
+  it('Intercept car creation response and validate', () => {
+    cy.intercept('POST', '/api/cars').as('createCar');
+
+    cy.contains('Add car').click();
+    cy.get('#addCarBrand').select('BMW');
+    cy.get('#addCarMileage').type('200');
+    cy.get('[class="modal-content"]').find('[class="btn btn-primary"]').contains('Add').click();
+
+    cy.wait('@createCar').then((interception) => {
+      cy.log(interception);
+      expect(interception.response.statusCode).to.eq(201);
+      createdCarId = interception.response.body.data.id;
+      expect(createdCarId).to.exist;
+
+    });
   });
 
 
-  it('Add car and Fuel expenses whole scenario', () => {
+  it('GET for created car ID', () => {
+    const cookies = Cypress.env('sessionCookies');
+    expect(cookies).to.exist;
 
-    cy.get('[class="btn btn-outline-white header_signin"]').click();
-    cy.get('#signinEmail').type(Cypress.env('userEmail'));
-    cy.get('#signinPassword').type(Cypress.env('userPassword'));
-    cy.get('[class="btn btn-primary"]').click();
-    cy.contains('Garage').should('be.visible');
+    cy.request({
+      method: 'GET',
+      url: '/api/cars',
+      headers: {
+        Cookie: cookies.map(c => `${c.name}=${c.value}`).join('; '),
+      },
+    }).then((response) => {
+      cy.log(response.body);
+      expect(response.status).to.eq(200);
+  
+      const createdCar = response.body.data.find(car => car.id === createdCarId);
+  
+      expect(createdCar).to.exist;
+  
+      cy.log(`Created Car ID: ${createdCar.id}`);
+    });
+  });
 
-    cy.contains('Add car').click();
-    cy.get('#addCarBrand').contains('Audi').should('be.visible');
-    cy.get('#addCarModel').contains('TT').should('be.visible');
 
-    cy.list_of_brands(['Audi', 'BMW', 'Ford', 'Porsche', 'Fiat']);
+  it('POST response to add expenses for created car', () => {
+    const cookies = Cypress.env('sessionCookies');
+    expect(cookies).to.exist;
+  
+    cy.request({
+      method: 'POST',
+      url: '/api/expenses',
+      headers: {
+        Cookie: cookies.map(c => `${c.name}=${c.value}`).join('; '),
+      },
+      body: {
+        carId: createdCarId,
+        reportedAt: new Date().toISOString().split('T')[0],
+        mileage: 220,
+        liters: 20,   
+        totalCost: 75,
+        forceMileage: false
+      },
+    }).then((response) => {
+      cy.log(response);
+      expect(response.status).to.eq(200);
+      console.log(response.body);
 
-    cy.list_of_audi_models(['TT', 'R8', 'Q7', 'A6', 'A8']);
+      expect(response.body.data).to.have.property('carId');
+      expect(response.body.data.carId).to.eq(createdCarId);
+    });
+  });
 
-    cy.get('#addCarBrand').select('BMW');
-    cy.get('#addCarBrand').contains('BMW').should('be.visible');
-    cy.get('#addCarModel').contains('3').should('be.visible');
+  it('GET response to get created expenses data', () => {
+    const cookies = Cypress.env('sessionCookies');
+    expect(cookies).to.exist;
 
-    cy.list_of_bmw_models(['3', '5', 'X5', 'X6', 'Z3']);
+    cy.request({
+      method: 'GET',
+      url: `/api/expenses?carId=${createdCarId}`,
+      headers: {
+        Cookie: cookies.map(c => `${c.name}=${c.value}`).join('; '),
+      },
+    }).then((response) => {
+      expect(response.status).to.eq(200);
+      expect(response.body.status).to.eq('ok');
+  
+      expect(response.body.data).to.be.an('array').that.is.not.empty;
+  
+      const expense = response.body.data.find(exp => exp.carId === createdCarId);
 
-    cy.get('#addCarBrand').select('Ford');
-    cy.get('#addCarBrand').contains('Ford').should('be.visible');
-    cy.get('#addCarModel').contains('Fiesta').should('be.visible');
+      expect(expense).to.exist;
+  
+      cy.log(`Created Car ID: ${createdCarId}`);
+      cy.log(`Mileage: ${expense.mileage}`);
+      cy.log(`Liters: ${expense.liters}`);
+      cy.log(`Total Cost: ${expense.totalCost}`);
+  
+      expect(expense).to.have.property('mileage');
+      expect(expense).to.have.property('liters');
+      expect(expense).to.have.property('totalCost');
+    });
+  });
 
-    cy.list_of_ford_models(['Fiesta', 'Focus', 'Fusion', 'Mondeo', 'Sierra']);
-
-    cy.get('#addCarBrand').select('Porsche');
-    cy.get('#addCarBrand').contains('Porsche').should('be.visible');
-    cy.get('#addCarModel').contains('911').should('be.visible');
-
-    cy.list_of_porsche_models(['911', 'Cayenne', 'Panamera']);
-
-    cy.get('#addCarBrand').select('Fiat');
-    cy.get('#addCarBrand').contains('Fiat').should('be.visible');
-    cy.get('#addCarModel').contains('Palio').should('be.visible');
-
-    cy.list_of_fiat_models(['Palio', 'Ducato', 'Panda', 'Punto', 'Scudo']);
-
-    cy.get('#addCarMileage').type('qwe');
-    cy.get('#addCarBrand').select('Audi');
-    cy.get('#addCarMileage').should('be.empty')
-    cy.contains('Mileage cost required').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+  it('Check added response for car on UI part', () => {
+    cy.login();
     
-    cy.get('#addCarMileage').type('-1');
-    cy.contains('Mileage has to be from 0 to 999999').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+    cy.get('[class="btn btn-white btn-sidebar sidebar_btn"]').contains('Fuel expenses').click();
+    cy.get('#carSelectDropdown').contains('BMW 3').should('be.visible');
+    cy.get('[class="expenses_table-wrapper"]').contains('220').should('be.visible');
+    cy.get('[class="expenses_table-wrapper"]').contains('20L').should('be.visible');
+    cy.get('[class="expenses_table-wrapper"]').contains('75.00 USD').should('be.visible');
+  });
 
-    cy.get('#addCarMileage').clear();
-    cy.get('#addCarMileage').type('0');
-    cy.get('[class="btn btn-primary"]').contains('Add').should('not.be.disabled');
-
-    cy.get('#addCarMileage').clear();
-    cy.get('#addCarMileage').type('9999991');
-    cy.get('#addCarBrand').select('Audi');
-    cy.contains('Mileage has to be from 0 to 999999').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
-    cy.get('[class="modal-content"]').find('[class="btn btn-primary"]').contains('Add').should('be.disabled');
-
+  it('Deleting created car', () => {
+    cy.login();
     
-    cy.get('#addCarMileage').clear();
-    cy.get('#addCarMileage').type('200');
-    cy.get('[class="btn btn-primary"]').contains('Add').should('not.be.disabled');
-    cy.get('[class="modal-content"]').find('[class="btn btn-primary"]').contains('Add').click();
-
-    cy.get('[class="car_add-expense btn btn-success"]').contains('Add fuel expense').should('be.visible');
-    cy.get('[class="car_add-expense btn btn-success"]').contains('Add fuel expense').click();
-    cy.contains('Add an expense').should('be.visible');
-    cy.get('[class="modal-content"]').find('[class="btn btn-primary"]').contains('Add').should('be.disabled')
-
-    cy.update_mileage('20');
-
-    cy.get('#addExpenseLiters').click();
-    cy.get('#addExpenseTotalCost').click();
-    cy.contains('Liters required').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
-    cy.get('#addExpenseLiters').click(); 
-    cy.contains('Total cost required').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
-
-    cy.get('#addExpenseLiters').type('0.009');
-    cy.contains('Liters has to be from 0.01 to 9999').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
-    cy.get('#addExpenseTotalCost').type('0');
-    cy.contains('Total cost has to be from 0.01 to 1000000').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
-
-    cy.get('#addExpenseLiters').clear();
-    cy.get('#addExpenseLiters').type('9998');
-    cy.get('#addExpenseTotalCost').click();
-
-    cy.get('#addExpenseTotalCost').clear();
-    cy.get('#addExpenseTotalCost').type('1000000');
-    cy.get('[class="modal-content"]').find('[class="btn btn-primary"]').contains('Add').should('not.be.disabled')
-
-    cy.get('#addExpenseLiters').clear();
-    cy.get('#addExpenseLiters').type('9999.01');
-    cy.contains('Liters has to be from 0.01 to 9999').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
-
-    cy.get('#addExpenseTotalCost').clear();
-    cy.get('#addExpenseTotalCost').type('1000000.01');
-    cy.contains('Total cost has to be from 0.01 to 1000000').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
-
-    cy.get('#addExpenseLiters').clear();
-    cy.get('#addExpenseLiters').type('5');
-
-    cy.get('#addExpenseTotalCost').clear();
-    cy.get('#addExpenseTotalCost').type('4');
-    cy.get('[class="modal-content"]').find('[class="btn btn-primary"]').contains('Add').should('not.be.disabled')
-
-    cy.get('[class="modal-content"]').find('[class="btn btn-primary"]').contains('Add').click();
-
-    cy.get('[class="col-lg-9 main-wrapper"]').find('h1').contains('Fuel expenses').should('be.visible');
-
-    cy.get('[class="btn btn-white btn-sidebar sidebar_btn"]').contains('Garage').click();
     cy.get('[class="icon icon-edit"]').click();
     cy.get('[class="btn btn-outline-danger"]').click();
     cy.get('[class="modal-content"]').find('[class="btn btn-danger"]').click();
     cy.contains('You don’t have any cars in your garage').should('be.visible');
   });
-});  
+});
+
+
+
+
+// describe('Add car and Fuel expenses', () => {
+//   before(() => {
+//     cy.visit('/')
+//     console.log(Cypress.env());
+//   });
+
+
+//   it('Add car and Fuel expenses whole scenario', () => {
+
+//     cy.get('[class="btn btn-outline-white header_signin"]').click();
+//     cy.get('#signinEmail').type(Cypress.env('userEmail'));
+//     cy.get('#signinPassword').type(Cypress.env('userPassword'));
+//     cy.get('[class="btn btn-primary"]').click();
+//     cy.contains('Garage').should('be.visible');
+
+//     cy.contains('Add car').click();
+//     cy.get('#addCarBrand').contains('Audi').should('be.visible');
+//     cy.get('#addCarModel').contains('TT').should('be.visible');
+
+//     cy.list_of_brands(['Audi', 'BMW', 'Ford', 'Porsche', 'Fiat']);
+
+//     cy.list_of_audi_models(['TT', 'R8', 'Q7', 'A6', 'A8']);
+
+//     cy.get('#addCarBrand').select('BMW');
+//     cy.get('#addCarBrand').contains('BMW').should('be.visible');
+//     cy.get('#addCarModel').contains('3').should('be.visible');
+
+//     cy.list_of_bmw_models(['3', '5', 'X5', 'X6', 'Z3']);
+
+//     cy.get('#addCarBrand').select('Ford');
+//     cy.get('#addCarBrand').contains('Ford').should('be.visible');
+//     cy.get('#addCarModel').contains('Fiesta').should('be.visible');
+
+//     cy.list_of_ford_models(['Fiesta', 'Focus', 'Fusion', 'Mondeo', 'Sierra']);
+
+//     cy.get('#addCarBrand').select('Porsche');
+//     cy.get('#addCarBrand').contains('Porsche').should('be.visible');
+//     cy.get('#addCarModel').contains('911').should('be.visible');
+
+//     cy.list_of_porsche_models(['911', 'Cayenne', 'Panamera']);
+
+//     cy.get('#addCarBrand').select('Fiat');
+//     cy.get('#addCarBrand').contains('Fiat').should('be.visible');
+//     cy.get('#addCarModel').contains('Palio').should('be.visible');
+
+//     cy.list_of_fiat_models(['Palio', 'Ducato', 'Panda', 'Punto', 'Scudo']);
+
+//     cy.get('#addCarMileage').type('qwe');
+//     cy.get('#addCarBrand').select('Audi');
+//     cy.get('#addCarMileage').should('be.empty')
+//     cy.contains('Mileage cost required').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+    
+//     cy.get('#addCarMileage').type('-1');
+//     cy.contains('Mileage has to be from 0 to 999999').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+
+//     cy.get('#addCarMileage').clear();
+//     cy.get('#addCarMileage').type('0');
+//     cy.get('[class="btn btn-primary"]').contains('Add').should('not.be.disabled');
+
+//     cy.get('#addCarMileage').clear();
+//     cy.get('#addCarMileage').type('9999991');
+//     cy.get('#addCarBrand').select('Audi');
+//     cy.contains('Mileage has to be from 0 to 999999').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+//     cy.get('[class="modal-content"]').find('[class="btn btn-primary"]').contains('Add').should('be.disabled');
+
+    
+//     cy.get('#addCarMileage').clear();
+//     cy.get('#addCarMileage').type('200');
+//     cy.get('[class="btn btn-primary"]').contains('Add').should('not.be.disabled');
+//     cy.get('[class="modal-content"]').find('[class="btn btn-primary"]').contains('Add').click();
+
+//     cy.get('[class="car_add-expense btn btn-success"]').contains('Add fuel expense').should('be.visible');
+//     cy.get('[class="car_add-expense btn btn-success"]').contains('Add fuel expense').click();
+//     cy.contains('Add an expense').should('be.visible');
+//     cy.get('[class="modal-content"]').find('[class="btn btn-primary"]').contains('Add').should('be.disabled')
+
+//     cy.update_mileage('20');
+
+//     cy.get('#addExpenseLiters').click();
+//     cy.get('#addExpenseTotalCost').click();
+//     cy.contains('Liters required').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+//     cy.get('#addExpenseLiters').click(); 
+//     cy.contains('Total cost required').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+
+//     cy.get('#addExpenseLiters').type('0.009');
+//     cy.contains('Liters has to be from 0.01 to 9999').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+//     cy.get('#addExpenseTotalCost').type('0');
+//     cy.contains('Total cost has to be from 0.01 to 1000000').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+
+//     cy.get('#addExpenseLiters').clear();
+//     cy.get('#addExpenseLiters').type('9998');
+//     cy.get('#addExpenseTotalCost').click();
+
+//     cy.get('#addExpenseTotalCost').clear();
+//     cy.get('#addExpenseTotalCost').type('1000000');
+//     cy.get('[class="modal-content"]').find('[class="btn btn-primary"]').contains('Add').should('not.be.disabled')
+
+//     cy.get('#addExpenseLiters').clear();
+//     cy.get('#addExpenseLiters').type('9999.01');
+//     cy.contains('Liters has to be from 0.01 to 9999').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+
+//     cy.get('#addExpenseTotalCost').clear();
+//     cy.get('#addExpenseTotalCost').type('1000000.01');
+//     cy.contains('Total cost has to be from 0.01 to 1000000').should('be.visible').and('have.css', 'color', 'rgb(220, 53, 69)');
+
+//     cy.get('#addExpenseLiters').clear();
+//     cy.get('#addExpenseLiters').type('5');
+
+//     cy.get('#addExpenseTotalCost').clear();
+//     cy.get('#addExpenseTotalCost').type('4');
+//     cy.get('[class="modal-content"]').find('[class="btn btn-primary"]').contains('Add').should('not.be.disabled')
+
+//     cy.get('[class="modal-content"]').find('[class="btn btn-primary"]').contains('Add').click();
+
+//     cy.get('[class="col-lg-9 main-wrapper"]').find('h1').contains('Fuel expenses').should('be.visible');
+
+//     cy.get('[class="btn btn-white btn-sidebar sidebar_btn"]').contains('Garage').click();
+//     cy.get('[class="icon icon-edit"]').click();
+//     cy.get('[class="btn btn-outline-danger"]').click();
+//     cy.get('[class="modal-content"]').find('[class="btn btn-danger"]').click();
+//     cy.contains('You don’t have any cars in your garage').should('be.visible');
+//   });
+// });  
 
 
 
